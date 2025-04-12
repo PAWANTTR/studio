@@ -25,7 +25,7 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import {
   Card,
@@ -158,6 +158,19 @@ export default function Home() {
         setOpenImage(null);
     };
 
+   // Load recipes from local storage on component mount
+    useEffect(() => {
+        const storedRecipes = localStorage.getItem('recipes');
+        if (storedRecipes) {
+            setRecipes(JSON.parse(storedRecipes));
+        }
+    }, []);
+
+    // Save recipes to local storage whenever the recipes state changes
+    useEffect(() => {
+        localStorage.setItem('recipes', JSON.stringify(recipes));
+    }, [recipes]);
+
 
   return (
     <SidebarProvider>
@@ -273,6 +286,7 @@ export default function Home() {
                       height={200}
                       className="rounded-md object-cover aspect-video cursor-pointer"
                       onClick={() => handleImageClick(recipe.imageUrl)}
+                      unoptimized={true}
                   />
                 <p className="text-sm text-muted-foreground mt-2">
                   Ingredients: {recipe.ingredients}
@@ -303,6 +317,7 @@ export default function Home() {
                           width={800}
                           height={600}
                           className="rounded-md object-contain"
+                          unoptimized={true}
                       />
                       <Button
                           variant="ghost"
