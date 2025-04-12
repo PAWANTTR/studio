@@ -12,7 +12,7 @@ import {
   SidebarProvider,
 } from '@/components/ui/sidebar';
 import {Button} from '@/components/ui/button';
-import {PlusCircle, Edit, Trash2} from 'lucide-react';
+import {PlusCircle, Edit, Trash2, X} from 'lucide-react';
 import Image from 'next/image';
 import {
   Dialog,
@@ -55,6 +55,8 @@ export default function Home() {
     const [newRecipeInstructions, setNewRecipeInstructions] = useState('');
   const { toast } = useToast()
   const [editRecipeId, setEditRecipeId] = useState<string | null>(null);
+  const [openImage, setOpenImage] = useState<string | null>(null);
+
 
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -147,6 +149,14 @@ export default function Home() {
       description: "Your recipe has been deleted.",
     });
   };
+
+    const handleImageClick = (imageUrl: string) => {
+        setOpenImage(imageUrl);
+    };
+
+    const handleCloseImage = () => {
+        setOpenImage(null);
+    };
 
 
   return (
@@ -256,13 +266,14 @@ export default function Home() {
                 <CardTitle>{recipe.name}</CardTitle>
               </CardHeader>
               <CardContent>
-                <Image
-                  src={recipe.imageUrl}
-                  alt={recipe.name}
-                  width={300}
-                  height={200}
-                  className="rounded-md object-cover aspect-video"
-                />
+                  <Image
+                      src={recipe.imageUrl}
+                      alt={recipe.name}
+                      width={300}
+                      height={200}
+                      className="rounded-md object-cover aspect-video cursor-pointer"
+                      onClick={() => handleImageClick(recipe.imageUrl)}
+                  />
                 <p className="text-sm text-muted-foreground mt-2">
                   Ingredients: {recipe.ingredients}
                 </p>
@@ -283,6 +294,26 @@ export default function Home() {
             </Card>
           ))}
         </div>
+          {openImage && (
+              <div className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-80 z-50 flex justify-center items-center">
+                  <div className="relative">
+                      <Image
+                          src={openImage}
+                          alt="Full Size Recipe"
+                          width={800}
+                          height={600}
+                          className="rounded-md object-contain"
+                      />
+                      <Button
+                          variant="ghost"
+                          className="absolute top-2 right-2"
+                          onClick={handleCloseImage}
+                      >
+                          <X className="h-6 w-6"/>
+                      </Button>
+                  </div>
+              </div>
+          )}
       </div>
     </SidebarProvider>
   );
