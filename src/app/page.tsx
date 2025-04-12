@@ -34,6 +34,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
+import { useToast } from "@/hooks/use-toast"
 
 
 interface Recipe {
@@ -46,19 +47,39 @@ export default function Home() {
   const [open, setOpen] = useState(false);
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [newRecipeName, setNewRecipeName] = useState('');
-  const [newRecipeImageUrl, setNewRecipeImageUrl] = useState('');
+  const [newRecipeImage, setNewRecipeImage] = useState<File | null>(null);
+  const { toast } = useToast()
 
-  const handleAddRecipe = () => {
-    if (newRecipeName && newRecipeImageUrl) {
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      setNewRecipeImage(e.target.files[0]);
+    }
+  };
+
+  const handleAddRecipe = async () => {
+    if (newRecipeName && newRecipeImage) {
+       // Generate a temporary URL for the local image file
+       const imageUrl = URL.createObjectURL(newRecipeImage);
+
       const newRecipe: Recipe = {
         id: uuidv4(),
         name: newRecipeName,
-        imageUrl: newRecipeImageUrl,
+        imageUrl: imageUrl,
       };
       setRecipes([...recipes, newRecipe]);
       setNewRecipeName('');
-      setNewRecipeImageUrl('');
+      setNewRecipeImage(null);
       setOpen(false);
+      toast({
+        title: "Recipe added!",
+        description: "Your recipe has been added to the vault.",
+      })
+    } else {
+      toast({
+            variant: 'destructive',
+            title: 'Error',
+            description: 'Please enter a recipe name and select an image.',
+          })
     }
   };
 
@@ -114,13 +135,14 @@ export default function Home() {
                   />
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="imageUrl" className="text-right">
-                    Image URL
+                  <Label htmlFor="image" className="text-right">
+                    Image
                   </Label>
                   <Input
-                    id="imageUrl"
-                    value={newRecipeImageUrl}
-                    onChange={(e) => setNewRecipeImageUrl(e.target.value)}
+                    id="image"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageChange}
                     className="col-span-3"
                   />
                 </div>
